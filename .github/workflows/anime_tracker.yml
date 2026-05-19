@@ -26,6 +26,13 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Check Webhook Secret Presence
+        run: |
+          if [ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL secret is empty or not set in Repository Secrets! Please make sure it is configured under Settings > Secrets and variables > Actions > Repository secrets."
+            exit 1
+          fi
+
       - name: Execute Tracker Script
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
