@@ -86,6 +86,28 @@ def save_sent_alerts(alerts):
     except Exception as e:
         print(f"Warning: Failed to save sent alerts cache: {e}")
 
+def post_to_webhook(payload, label="Alert"):
+    """Posts a JSON payload to the Discord Webhook URL."""
+    if not WEBHOOK_URL:
+        print(f"Error: Missing DISCORD_WEBHOOK_URL environment variable for {label}.")
+        return False
+        
+    req = urllib.request.Request(
+        WEBHOOK_URL,
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as res:
+            print(f"Successfully posted {label} (Status: {res.status})")
+            return True
+    except Exception as err:
+        print(f"Failed to post webhook for {label}: {err}")
+        return False
+
 # --- MyAnimeList / Jikan API Fallback Helpers ---
 
 DAY_MAP = {
@@ -349,18 +371,9 @@ def check_and_post():
             }
 
             # Post webhook to Discord
-            webhook_req = urllib.request.Request(
-                WEBHOOK_URL,
-                data=json.dumps(discord_payload).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
-            )
-            try:
-                with urllib.request.urlopen(webhook_req) as wh_res:
-                    print(f"Successfully posted MAL alert for {title} Ep {episode} (Status: {wh_res.status})")
-                    sent_alerts.append(alert_key)
-                    new_alerts_sent = True
-            except Exception as wh_err:
-                print(f"Failed to post webhook for {title} Ep {episode}: {wh_err}")
+            if post_to_webhook(discord_payload, f"MAL Alert for {title} Ep {episode}"):
+                sent_alerts.append(alert_key)
+                new_alerts_sent = True
                 
     else:
         if not schedules:
@@ -411,18 +424,9 @@ def check_and_post():
             }
 
             # Post webhook to Discord
-            webhook_req = urllib.request.Request(
-                WEBHOOK_URL,
-                data=json.dumps(discord_payload).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
-            )
-            try:
-                with urllib.request.urlopen(webhook_req) as wh_res:
-                    print(f"Successfully posted alert for {romaji_title} Ep {episode} (Status: {wh_res.status})")
-                    sent_alerts.append(alert_key)
-                    new_alerts_sent = True
-            except Exception as wh_err:
-                print(f"Failed to post webhook for {romaji_title} Ep {episode}: {wh_err}")
+            if post_to_webhook(discord_payload, f"Alert for {romaji_title} Ep {episode}"):
+                sent_alerts.append(alert_key)
+                new_alerts_sent = True
 
     # Save state if any notifications were successfully sent
     if new_alerts_sent:
@@ -430,10 +434,6 @@ def check_and_post():
 
 def send_test_notification():
     """Sends a mock/test notification to Discord to verify the webhook setup."""
-    if not WEBHOOK_URL:
-        print("Error: Missing DISCORD_WEBHOOK_URL environment variable.")
-        return
-        
     print("Sending test notification to Discord...")
     discord_payload = {
         "embeds": [
@@ -452,17 +452,7 @@ def send_test_notification():
             }
         ]
     }
-    
-    webhook_req = urllib.request.Request(
-        WEBHOOK_URL,
-        data=json.dumps(discord_payload).encode('utf-8'),
-        headers={'Content-Type': 'application/json'}
-    )
-    try:
-        with urllib.request.urlopen(webhook_req) as wh_res:
-            print(f"Successfully posted test alert (Status: {wh_res.status})")
-    except Exception as wh_err:
-        print(f"Failed to post test webhook: {wh_err}")
+    post_to_webhook(discord_payload, "Test Notification")
 
 # ==============================================================================
 # 5. ENTRY POINT
