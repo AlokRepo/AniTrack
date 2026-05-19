@@ -10,10 +10,7 @@ import datetime
 # 1. USER CONFIGURATION
 # ==============================================================================
 # Credentials and Endpoints
-WEBHOOK_URL = os.environ.get(
-    "DISCORD_WEBHOOK_URL", 
-    "https://discord.com/api/webhooks/1505973001123004566/V0z_FPFbqaWczFAxTiCnZRHTUR9GMJ7dJr-O6XJ8lWp2Ez1wBrVzGhfhvDVwoIrZQwW0"
-)
+WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 ANILIST_API_URL = "https://graphql.anilist.co"
 
 # Streaming Platform Settings
