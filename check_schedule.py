@@ -31,7 +31,7 @@ EMBED_COLOR = 3447003  # Deep Blue Hexadecimal Integer (0x3498db)
 ANILIST_QUERY = """
 query ($startTime: Int, $endTime: Int) {
   Page(page: 1, perPage: 25) {
-    airingSchedules(airingAt_greater: $startTime, airingAt_less: $endTime) {
+    airingSchedules(airingAt_greater: $startTime, airingAt_lesser: $endTime) {
       id
       episode
       media {
@@ -428,9 +428,49 @@ def check_and_post():
     if new_alerts_sent:
         save_sent_alerts(sent_alerts)
 
+def send_test_notification():
+    """Sends a mock/test notification to Discord to verify the webhook setup."""
+    if not WEBHOOK_URL:
+        print("Error: Missing DISCORD_WEBHOOK_URL environment variable.")
+        return
+        
+    print("Sending test notification to Discord...")
+    discord_payload = {
+        "embeds": [
+            {
+                "title": "🧪 Aniverse Tracker Test Alert",
+                "description": "This is a test notification from your **Aniverse Airing Tracker** setup. Webhook connectivity is verified!",
+                "url": WATCH_BASE_URL,
+                "color": EMBED_COLOR,
+                "fields": [
+                    {
+                        "name": "📡 Connection Status",
+                        "value": "Successful! Your Discord webhook configuration is working.",
+                        "inline": False
+                    }
+                ]
+            }
+        ]
+    }
+    
+    webhook_req = urllib.request.Request(
+        WEBHOOK_URL,
+        data=json.dumps(discord_payload).encode('utf-8'),
+        headers={'Content-Type': 'application/json'}
+    )
+    try:
+        with urllib.request.urlopen(webhook_req) as wh_res:
+            print(f"Successfully posted test alert (Status: {wh_res.status})")
+    except Exception as wh_err:
+        print(f"Failed to post test webhook: {wh_err}")
+
 # ==============================================================================
 # 5. ENTRY POINT
 # ==============================================================================
 if __name__ == "__main__":
-    check_and_post()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--test":
+        send_test_notification()
+    else:
+        check_and_post()
 

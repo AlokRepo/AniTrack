@@ -4,8 +4,13 @@ on:
   schedule:
     # Runs automatically every 15 minutes
     - cron: '*/15 * * * *'
-  # Allows you to manually trigger the workflow from the Actions tab for testing
   workflow_dispatch:
+    inputs:
+      test:
+        description: 'Send a test notification to verify Discord webhook setup'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   check-schedule:
@@ -24,7 +29,12 @@ jobs:
       - name: Execute Tracker Script
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python check_schedule.py
+        run: |
+          if [ "${{ github.event.inputs.test }}" = "true" ]; then
+            python check_schedule.py --test
+          else
+            python check_schedule.py
+          fi
 
       - name: Commit and push sent alerts cache
         run: |
