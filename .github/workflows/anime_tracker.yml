@@ -1,0 +1,39 @@
+name: Aniverse Airing Tracker
+
+on:
+  schedule:
+    # Runs automatically every 15 minutes
+    - cron: '*/15 * * * *'
+  # Allows you to manually trigger the workflow from the Actions tab for testing
+  workflow_dispatch:
+
+jobs:
+  check-schedule:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute Tracker Script
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python check_schedule.py
+
+      - name: Commit and push sent alerts cache
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain sent_alerts.json)" ]; then
+            git add sent_alerts.json
+            git commit -m "chore: Update sent alerts cache [skip ci]"
+            git push
+          else
+            echo "No changes to sent alerts cache."
+          fi
