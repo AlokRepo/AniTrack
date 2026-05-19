@@ -94,3 +94,11 @@ To ensure the same episode is not posted multiple times, the script stores a his
 
 - **Local Run**: The `sent_alerts.json` file is read and updated on your local disk.
 - **GitHub Actions Run**: The workflow has write permissions enabled (`contents: write`). When new alerts are successfully sent, the Action automatically commits the updated `sent_alerts.json` file back to the repository (using the `[skip ci]` tag to avoid triggering recursive runs). This ensures state is maintained between scheduled cron executions.
+
+---
+
+## 💬 Community & Support
+
+Join our official community server to connect with other users, follow updates, get support, and share feedback:
+
+👉 **[Join the official Discord Server](https://discord.com/invite/Fcqwtdnv3g)**
