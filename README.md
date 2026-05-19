@@ -53,9 +53,14 @@ If AniList is down, unreachable, or returns error responses, the tracker automat
      ```
 
 3. **Run the Script**:
-   ```bash
-   python check_schedule.py
-   ```
+   - **Normal Tracking Mode**:
+     ```bash
+     python check_schedule.py
+     ```
+   - **Test Webhook Mode** (Verify Discord connectivity):
+     ```bash
+     python check_schedule.py --test
+     ```
 
 ---
 
@@ -79,7 +84,7 @@ This repository is pre-configured to run automatically on GitHub using GitHub Ac
 
 3. **Automatic & Manual Runs**:
    - **Automated**: The action is scheduled to run every 15 minutes via the cron trigger (`*/15 * * * *`).
-   - **Manual**: You can trigger the tracker at any time by going to the **Actions** tab in your GitHub repository, selecting the **Aniverse Airing Tracker** workflow, and clicking **Run workflow**.
+   - **Manual**: You can trigger the tracker at any time by going to the **Actions** tab in your GitHub repository, selecting the **Aniverse Airing Tracker** workflow, and clicking **Run workflow**. You can also check the **"Send a test notification..."** box to send a simulated alert to your channel immediately.
 
 ---
 
