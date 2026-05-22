@@ -18,8 +18,9 @@ WATCH_BASE_URL = "https://aniverse.sbs"
 PROVIDER_NAME = "Aniverse"
 
 # Query Windows
-# Looks back 16 minutes (960 seconds) to ensure execution delays don't miss episodes
-LOOKBACK_WINDOW_SECONDS = 960
+# Looks back 24 hours (86400 seconds) to handle GitHub Actions scheduler delays.
+# Deduplication using sent_alerts.json ensures no duplicate posts.
+LOOKBACK_WINDOW_SECONDS = 86400
 
 # Discord Embed Customization
 EMBED_TITLE = "🚨 New Episode Alert!"
@@ -30,7 +31,7 @@ EMBED_COLOR = 3447003  # Deep Blue Hexadecimal Integer (0x3498db)
 # ==============================================================================
 ANILIST_QUERY = """
 query ($startTime: Int, $endTime: Int) {
-  Page(page: 1, perPage: 25) {
+  Page(page: 1, perPage: 100) {
     airingSchedules(airingAt_greater: $startTime, airingAt_lesser: $endTime) {
       id
       episode
@@ -77,10 +78,10 @@ def load_sent_alerts():
     return []
 
 def save_sent_alerts(alerts):
-    """Saves sent alerts back to the cache file, keeping only the last 100 entries."""
+    """Saves sent alerts back to the cache file, keeping only the last 300 entries."""
     try:
         # Keep list size bounded
-        alerts = alerts[-100:]
+        alerts = alerts[-300:]
         with open(SENT_ALERTS_FILE, "w", encoding="utf-8") as f:
             json.dump(alerts, f, indent=2)
     except Exception as e:
